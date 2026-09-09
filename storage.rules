@@ -1,0 +1,20 @@
+rules_version = '2';
+
+// Storage security rules for the HSC Question Bank.
+//
+// Same open-access model as Firestore: anyone can read and upload files
+// under the questions/ path (this is where the app writes to), since there
+// is no login system. Uploads are capped at 15MB per file as a basic
+// safeguard against accidental huge uploads eating into the free tier.
+//
+// To apply: Firebase Console > Storage > Rules tab, paste this in, and
+// click Publish.
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /questions/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.resource.size < 15 * 1024 * 1024;
+    }
+  }
+}

@@ -1,0 +1,29 @@
+rules_version = '2';
+
+// Firestore security rules for the HSC Question Bank.
+//
+// Since this app has no login, access control here is intentionally simple:
+// anyone can read Live questions (so browsing works for everyone with the
+// link) and anyone can create new questions (so uploading works for
+// everyone). Direct edits to existing fields are restricted to just the
+// upvote count and status, so a visitor cannot rewrite someone else's
+// question content or fabricate a different uploader name after the fact.
+//
+// To apply these rules: Firebase Console > Firestore Database > Rules tab,
+// paste this in, and click Publish.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /questions/{questionId} {
+      allow read: if true;
+      allow create: if true;
+
+      // Only allow updates that change upvotes and/or status, nothing else,
+      // so the original question content cannot be silently altered later.
+      allow update: if request.resource.data.diff(resource.data).affectedKeys()
+                      .hasOnly(['upvotes', 'status']);
+
+      allow delete: if false;
+    }
+  }
+}
