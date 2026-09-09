@@ -141,7 +141,7 @@ export default function BrowsePage() {
                 </div>
 
                 <div className="flex flex-wrap gap-2.5">
-                  <a
+                  
                     href={q.questionFileUrl}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -150,7 +150,7 @@ export default function BrowsePage() {
                     View question
                   </a>
                   {q.answerFileUrl && (
-                    <a
+                    
                       href={q.answerFileUrl}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -201,9 +201,12 @@ function PracticePaperBuilder({ subject, module: moduleName }: { subject: string
   const [count, setCount] = useState("");
   const [includeAnswers, setIncludeAnswers] = useState(false);
   const [generating, setGenerating] = useState(false);
-  const [result, setResult] = useState<{ type: "success" | "error"; message: string } | null>(
-    null
-  );
+  const [result, setResult] = useState<{
+    type: "success" | "error";
+    message: string;
+    downloadUrl?: string;
+    fileName?: string;
+  } | null>(null);
 
   async function handleGenerate() {
     setResult(null);
@@ -232,18 +235,17 @@ function PracticePaperBuilder({ subject, module: moduleName }: { subject: string
         throw new Error(data.message || "Could not generate paper.");
       }
 
+      // Mobile browsers frequently block or silently ignore JS-triggered
+      // downloads, especially for large data: URLs like a base64 PDF. The
+      // reliable approach across desktop and mobile alike is to show the
+      // person a normal link they tap/click themselves, rather than trying
+      // to force a download programmatically.
       setResult({
         type: "success",
         message: `Paper ready with ${data.questionCount} questions.`,
+        downloadUrl: data.downloadUrl,
+        fileName: data.fileName || "practice-paper.pdf",
       });
-
-      // Trigger the browser download using the returned PDF data URL.
-      const link = document.createElement("a");
-      link.href = data.downloadUrl;
-      link.download = data.fileName || "practice-paper.pdf";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
     } catch (err) {
       setResult({
         type: "error",
@@ -302,7 +304,16 @@ function PracticePaperBuilder({ subject, module: moduleName }: { subject: string
               : "border-[#eec4b6] bg-[#fbeae5] text-[#b3452c]"
           }`}
         >
-          {result.message}
+          <p>{result.message}</p>
+          {result.downloadUrl && (
+            
+              href={result.downloadUrl}
+              download={result.fileName}
+              className="mt-2 inline-block underline font-semibold"
+            >
+              Tap here to download your practice paper
+            </a>
+          )}
         </div>
       )}
     </div>
