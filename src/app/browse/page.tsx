@@ -141,7 +141,7 @@ export default function BrowsePage() {
                 </div>
 
                 <div className="flex flex-wrap gap-2.5">
-                  
+                  <a
                     href={q.questionFileUrl}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -150,7 +150,7 @@ export default function BrowsePage() {
                     View question
                   </a>
                   {q.answerFileUrl && (
-                    
+                    <a
                       href={q.answerFileUrl}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -306,7 +306,7 @@ function PracticePaperBuilder({ subject, module: moduleName }: { subject: string
         >
           <p>{result.message}</p>
           {result.downloadUrl && (
-            
+            <a
               href={result.downloadUrl}
               download={result.fileName}
               className="mt-2 inline-block underline font-semibold"
